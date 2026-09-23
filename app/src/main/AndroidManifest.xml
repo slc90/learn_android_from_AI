@@ -23,6 +23,12 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <activity
+            android:name=".SecondActivity"
+            android:exported="false"
+            android:theme="@style/Theme.Learn_android_from_AI.Translucent" />
+
     </application>
 
 </manifest>
