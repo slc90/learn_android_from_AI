@@ -17,6 +17,11 @@ import android.content.Intent
 import androidx.compose.material3.Button
 import android.os.Process
 import java.io.File
+import androidx.compose.foundation.layout.Column
+import androidx.work.OneTimeWorkRequestBuilder
+import androidx.work.WorkManager
+import java.util.concurrent.TimeUnit
+import androidx.core.content.ContextCompat
 
 class MainActivity : ComponentActivity() {
     private var counter = 0
@@ -50,15 +55,68 @@ class MainActivity : ComponentActivity() {
         setContent {
             Learn_android_from_AITheme {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    Button(
-                        onClick = {
-                            startActivity(
-                                Intent(this@MainActivity, SecondActivity::class.java)
-                            )
-                        },
+                    Column(
                         modifier = Modifier.padding(innerPadding)
                     ) {
-                        Text("Open SecondActivity")
+                        Button(
+                            onClick = {
+                                startActivity(
+                                    Intent(this@MainActivity, SecondActivity::class.java)
+                                )
+                            }
+                        ) {
+                            Text("Open SecondActivity")
+                        }
+
+                        Button(
+                            onClick = {
+                                val request =
+                                    OneTimeWorkRequestBuilder<WorkManagerTestWorker>()
+                                        .setInitialDelay(30, TimeUnit.SECONDS)
+                                        .build()
+
+                                WorkManager
+                                    .getInstance(this@MainActivity)
+                                    .enqueue(request)
+
+                                Log.d(
+                                    "WorkManagerTest",
+                                    "Work enqueued, pid=${Process.myPid()}, id=${request.id}"
+                                )
+                            }
+                        ) {
+                            Text("Schedule Worker")
+                        }
+
+                        Button(
+                            onClick = {
+                                val intent =
+                                    Intent(
+                                        this@MainActivity,
+                                        ForegroundServiceTest::class.java
+                                    )
+
+                                ContextCompat.startForegroundService(
+                                    this@MainActivity,
+                                    intent
+                                )
+                            }
+                        ) {
+                            Text("Start Foreground Service")
+                        }
+
+                        Button(
+                            onClick = {
+                                stopService(
+                                    Intent(
+                                        this@MainActivity,
+                                        ForegroundServiceTest::class.java
+                                    )
+                                )
+                            }
+                        ) {
+                            Text("Stop Foreground Service")
+                        }
                     }
                 }
             }
