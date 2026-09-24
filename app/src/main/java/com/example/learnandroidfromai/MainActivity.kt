@@ -16,6 +16,7 @@ import android.util.Log
 import android.content.Intent
 import androidx.compose.material3.Button
 import android.os.Process
+import java.io.File
 
 class MainActivity : ComponentActivity() {
     private var counter = 0
@@ -38,6 +39,8 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        runStorageExperiment()
 
         counter = savedInstanceState?.getInt("counter") ?: 0
 
@@ -90,6 +93,28 @@ class MainActivity : ComponentActivity() {
     override fun onDestroy() {
         super.onDestroy()
         logLifecycle("onDestroy")
+    }
+
+    private fun runStorageExperiment() {
+        // 1. Internal 持久文件
+        val internalFile = File(filesDir, "internal_test.txt")
+        internalFile.writeText("Hello from filesDir")
+
+        // 2. Internal Cache
+        val cacheFile = File(cacheDir, "cache_test.txt")
+        cacheFile.writeText("Hello from cacheDir")
+
+        // 3. External App-specific 持久文件
+        val externalDir = getExternalFilesDir(null)
+        val externalFile = externalDir?.let {
+            File(it, "external_test.txt").apply {
+                writeText("Hello from external files dir")
+            }
+        }
+
+        Log.d("StorageTest", "filesDir = ${internalFile.absolutePath}")
+        Log.d("StorageTest", "cacheDir = ${cacheFile.absolutePath}")
+        Log.d("StorageTest", "external = ${externalFile?.absolutePath}")
     }
 }
 
