@@ -26,7 +26,12 @@ import androidx.compose.ui.unit.dp
 import com.example.learnandroidfromai.ui.theme.Learn_android_from_AITheme
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material3.Switch
+import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.text.input.ImeAction
 
 class MainActivity : ComponentActivity() {
     @OptIn(ExperimentalMaterial3Api::class)
@@ -66,7 +71,8 @@ fun Stage3Screen(modifier: Modifier = Modifier,
         uiState = uiState,
         onTextChange = viewModel::onTextChange,
         onStartClick = viewModel::onStartClick,
-        onLoadingClick = viewModel::onLoadingClick
+        onLoadingClick = viewModel::onLoadingClick,
+        onReviewModeChange = viewModel::onReviewModeChange
     )
 }
 
@@ -77,6 +83,7 @@ fun Stage3Content(
     onTextChange: (String) -> Unit,
     onStartClick: () -> Unit,
     onLoadingClick: () -> Unit,
+    onReviewModeChange: (Boolean) -> Unit
 ) {
     val canStart = uiState.text.isNotBlank()
 
@@ -84,18 +91,28 @@ fun Stage3Content(
         mutableStateOf(false)
     }
 
+    val focusManager = LocalFocusManager.current
+
     Column(
         modifier = modifier.padding(24.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-
         OutlinedTextField(
             value = uiState.text,
             onValueChange = onTextChange,
             label = {
                 Text("搜索主题")
-            }
+            },
+            singleLine = true,
+            keyboardOptions = KeyboardOptions(
+                imeAction = ImeAction.Done
+            ),
+            keyboardActions = KeyboardActions(
+                onDone = {
+                    focusManager.clearFocus()
+                }
+            )
         )
 
         Text("当前输入：${uiState.text}")
@@ -133,52 +150,32 @@ fun Stage3Content(
             Text("加载完成")
         }
 
-        Button(
-            onClick = {
+        Text(
+            text = if (showDetails) {
+                "收起说明"
+            } else {
+                "展开说明"
+            },
+            modifier = Modifier.padding(16.dp).clickable {
                 showDetails = !showDetails
             }
-        ) {
-            Text(
-                if (showDetails) {
-                    "收起说明"
-                } else {
-                    "展开说明"
-                }
-            )
-        }
+        )
 
         if (showDetails) {
             Text("这里是 Stage 3 的学习说明")
         }
-    }
-}
 
-@Preview(showBackground = true)
-@Composable
-fun Stage3ContentPreview() {
-    Learn_android_from_AITheme {
-        Stage3Content(
-            uiState = Stage3UiState(
-                text = "Android",
-                isStarted = true,
-                isLoading = true
-            ),
-            onTextChange = {},
-            onStartClick = {},
-            onLoadingClick = {}
+        Switch(
+            checked = uiState.isReviewMode,
+            onCheckedChange = onReviewModeChange
         )
-    }
-}
 
-@Preview(showBackground = true)
-@Composable
-fun Stage3ContentNotStartedPreview() {
-    Learn_android_from_AITheme {
-        Stage3Content(
-            uiState = Stage3UiState(),
-            onTextChange = {},
-            onStartClick = {},
-            onLoadingClick = {}
+        Text(
+            if (uiState.isReviewMode) {
+                "当前模式：复习"
+            } else {
+                "当前模式：学习"
+            }
         )
     }
 }

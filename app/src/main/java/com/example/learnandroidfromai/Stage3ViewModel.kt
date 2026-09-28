@@ -8,7 +8,8 @@ import kotlinx.coroutines.flow.update
 data class Stage3UiState(
     val text: String = "",
     val isStarted: Boolean = false,
-    val isLoading: Boolean = false
+    val isLoading: Boolean = false,
+    val isReviewMode: Boolean = false
 )
 
 class Stage3ViewModel : ViewModel() {
@@ -36,6 +37,14 @@ class Stage3ViewModel : ViewModel() {
         _uiState.update { oldState ->
             oldState.copy(
                 isLoading = !oldState.isLoading
+            )
+        }
+    }
+
+    fun onReviewModeChange(checked: Boolean) {
+        _uiState.update { oldState ->
+            oldState.copy(
+                isReviewMode = !oldState.isReviewMode
             )
         }
     }
