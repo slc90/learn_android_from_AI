@@ -4,37 +4,29 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.Button
-import androidx.compose.material3.Card
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.unit.dp
-import com.example.learnandroidfromai.ui.theme.Learn_android_from_AITheme
-import androidx.compose.foundation.lazy.items
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
+import com.example.learnandroidfromai.ui.theme.Learn_android_from_AITheme
+import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.compose.ui.tooling.preview.Preview
 
 class MainActivity : ComponentActivity() {
     @OptIn(ExperimentalMaterial3Api::class)
@@ -53,9 +45,6 @@ class MainActivity : ComponentActivity() {
                         )
                     }
                 ) { innerPadding ->
-//                    LearningList(
-//                        modifier = Modifier.padding(innerPadding)
-//                    )
                     Stage3Screen(
                         modifier = Modifier.padding(innerPadding)
                     )
@@ -68,159 +57,128 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable
-fun Stage3Screen(modifier: Modifier = Modifier) {
+fun Stage3Screen(modifier: Modifier = Modifier,
+                 viewModel: Stage3ViewModel = viewModel()) {
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+
+    Stage3Content(
+        modifier = modifier,
+        uiState = uiState,
+        onTextChange = viewModel::onTextChange,
+        onStartClick = viewModel::onStartClick,
+        onLoadingClick = viewModel::onLoadingClick
+    )
+}
+
+@Composable
+fun Stage3Content(
+    modifier: Modifier = Modifier,
+    uiState: Stage3UiState,
+    onTextChange: (String) -> Unit,
+    onStartClick: () -> Unit,
+    onLoadingClick: () -> Unit,
+) {
+    val canStart = uiState.text.isNotBlank()
+
+    var showDetails by remember {
+        mutableStateOf(false)
+    }
+
     Column(
         modifier = modifier.padding(24.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        var text by remember {
-            mutableStateOf("")
-        }
 
-        Column {
-            OutlinedTextField(
-                value = text,
-                onValueChange = {
-                    text = it
-                },
-                label = {
-                    Text("搜索主题")
-                }
-            )
-
-            Text("当前输入：$text")
-        }
-
-        Text(
-            text = "Modifier Test",
-            modifier = Modifier
-                .background(Color.LightGray)
-                .padding(24.dp)
+        OutlinedTextField(
+            value = uiState.text,
+            onValueChange = onTextChange,
+            label = {
+                Text("搜索主题")
+            }
         )
 
-        Text(
-            text = "Modifier Test",
-            modifier = Modifier
-                .padding(24.dp)
-                .background(Color.LightGray)
-        )
+        Text("当前输入：${uiState.text}")
 
-        Box(
-            modifier = Modifier
-                .size(200.dp)
-                .background(Color.LightGray),
-            contentAlignment = Alignment.BottomEnd
-        ) {
-            Text("Hello Box")
-        }
-
-        Text("Stage 3")
-
-        Text("Jetpack Compose")
-
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(12.dp)
-        ) {
-            Button(
-                onClick = {},
-                modifier = Modifier.weight(2f)
-            ) {
-                Text("开始学习")
-            }
-
-            Button(
-                onClick = {},
-                modifier = Modifier.weight(1f)
-            ) {
-                Text("查看进度")
-            }
-        }
-
-        LearningCard()
-    }
-}
-
-@Composable
-fun LearningCard() {
-    Card(
-        modifier = Modifier.fillMaxWidth()
-    ) {
-        Column(
-            modifier = Modifier.padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
+        Button(
+            onClick = onStartClick,
+            enabled = canStart
         ) {
             Text(
-                text = "Stage 3",
-                style = MaterialTheme.typography.titleLarge
-            )
-
-            Text(
-                text = "Jetpack Compose 界面开发",
-                style = MaterialTheme.typography.bodyMedium
-            )
-
-            Button(
-                onClick = {}
-            ) {
-                Text("继续学习")
-            }
-        }
-    }
-}
-
-@Composable
-fun LearningList(modifier: Modifier = Modifier) {
-    val topics = listOf(
-        Topic("Compose 布局", "Column、Row、Box"),
-        Topic("Material 组件", "Card、Button、TopAppBar"),
-        Topic("界面状态", "后面会学")
-    )
-
-    LazyColumn(
-        modifier = modifier.fillMaxSize(),
-        contentPadding = PaddingValues(16.dp),
-        verticalArrangement = Arrangement.spacedBy(12.dp)
-    ) {
-        items(topics) { topic ->
-            TopicItem(
-                topic = topic,
-                onClick = {
-                    println("点击了：${topic.title}")
+                if (uiState.isStarted) {
+                    "已开始"
+                } else {
+                    "开始学习"
                 }
             )
         }
+
+        Text(
+            if (uiState.isStarted) {
+                "当前状态：学习中"
+            } else {
+                "当前状态：未开始"
+            }
+        )
+
+        Button(
+            onClick = onLoadingClick
+        ) {
+            Text("切换加载状态")
+        }
+
+        if (uiState.isLoading) {
+            CircularProgressIndicator()
+        } else {
+            Text("加载完成")
+        }
+
+        Button(
+            onClick = {
+                showDetails = !showDetails
+            }
+        ) {
+            Text(
+                if (showDetails) {
+                    "收起说明"
+                } else {
+                    "展开说明"
+                }
+            )
+        }
+
+        if (showDetails) {
+            Text("这里是 Stage 3 的学习说明")
+        }
     }
 }
 
-data class Topic(
-    val title: String,
-    val description: String
-)
-
+@Preview(showBackground = true)
 @Composable
-fun TopicItem(
-    topic: Topic,
-    onClick: () -> Unit
-) {
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clickable(onClick = onClick)
-    ) {
-        Column(
-            modifier = Modifier.padding(16.dp)
-        ) {
-            Text(
-                text = topic.title,
-                style = MaterialTheme.typography.titleMedium
-            )
+fun Stage3ContentPreview() {
+    Learn_android_from_AITheme {
+        Stage3Content(
+            uiState = Stage3UiState(
+                text = "Android",
+                isStarted = true,
+                isLoading = true
+            ),
+            onTextChange = {},
+            onStartClick = {},
+            onLoadingClick = {}
+        )
+    }
+}
 
-            Text(
-                text = topic.description,
-                style = MaterialTheme.typography.bodyMedium
-            )
-        }
+@Preview(showBackground = true)
+@Composable
+fun Stage3ContentNotStartedPreview() {
+    Learn_android_from_AITheme {
+        Stage3Content(
+            uiState = Stage3UiState(),
+            onTextChange = {},
+            onStartClick = {},
+            onLoadingClick = {}
+        )
     }
 }
