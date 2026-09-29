@@ -1,15 +1,16 @@
 package com.example.learnandroidfromai
 
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 
 data class Stage3UiState(
-    val text: String = "",
     val isStarted: Boolean = false,
-    val isLoading: Boolean = false,
-    val isReviewMode: Boolean = false
 )
 
 class Stage3ViewModel : ViewModel() {
@@ -19,11 +20,6 @@ class Stage3ViewModel : ViewModel() {
 
     val uiState = _uiState.asStateFlow()
 
-    fun onTextChange(text: String) {
-        _uiState.update { oldState ->
-            oldState.copy(text = text)
-        }
-    }
 
     fun onStartClick() {
         _uiState.update { oldState ->
@@ -32,20 +28,24 @@ class Stage3ViewModel : ViewModel() {
             )
         }
     }
+}
 
-    fun onLoadingClick() {
-        _uiState.update { oldState ->
-            oldState.copy(
-                isLoading = !oldState.isLoading
-            )
-        }
+class SetupViewModel : ViewModel() {
+
+    var text by mutableStateOf("")
+        private set
+
+    fun onTextChange(value: String) {
+        text = value
     }
+}
 
-    fun onReviewModeChange(checked: Boolean) {
-        _uiState.update { oldState ->
-            oldState.copy(
-                isReviewMode = !oldState.isReviewMode
-            )
-        }
+class StudyViewModel : ViewModel() {
+
+    var count by mutableIntStateOf(0)
+        private set
+
+    fun increase() {
+        count++
     }
 }
