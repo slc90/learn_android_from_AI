@@ -16,6 +16,8 @@ import androidx.navigation3.ui.NavDisplay
 import kotlinx.serialization.Serializable
 import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.lifecycle.viewmodel.navigation3.rememberViewModelStoreNavEntryDecorator
+import androidx.compose.foundation.layout.Row
+import androidx.compose.material3.Switch
 
 @Serializable
 data object SetupRoute : NavKey
@@ -70,8 +72,16 @@ fun Stage3App(modifier: Modifier = Modifier) {
 @Composable
 fun SetupScreen(
     onNavigateToStudy: (String) -> Unit,
-    viewModel: SetupViewModel = viewModel()
+    viewModel: SetupViewModel = viewModel(),
+    settingsViewModel: SettingsViewModel = viewModel(),
+    studyNoteViewModel: StudyNoteViewModel = viewModel()
 ) {
+    val settingsUiState by
+    settingsViewModel.uiState.collectAsStateWithLifecycle()
+
+    val noteUiState by
+    studyNoteViewModel.uiState.collectAsStateWithLifecycle()
+
     Column {
         OutlinedTextField(
             value = viewModel.text,
@@ -85,6 +95,41 @@ fun SetupScreen(
         ) {
             Text("开始学习")
         }
+
+        Row {
+            Text("显示学习提示")
+
+            Switch(
+                checked = settingsUiState.showStudyTip,
+                onCheckedChange = settingsViewModel::setShowStudyTip
+            )
+        }
+
+        OutlinedTextField(
+            value = noteUiState.inputText,
+            onValueChange = studyNoteViewModel::onInputChange,
+            label = {
+                Text("学习笔记")
+            }
+        )
+
+        Row {
+            Button(
+                onClick = studyNoteViewModel::save
+            ) {
+                Text("保存")
+            }
+
+            Button(
+                onClick = studyNoteViewModel::read
+            ) {
+                Text("读取")
+            }
+        }
+
+        Text(
+            text = "读取结果：${noteUiState.savedText}"
+        )
     }
 }
 
