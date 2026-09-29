@@ -18,6 +18,10 @@ import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.lifecycle.viewmodel.navigation3.rememberViewModelStoreNavEntryDecorator
 import androidx.compose.foundation.layout.Row
 import androidx.compose.material3.Switch
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.material3.Checkbox
 
 @Serializable
 data object SetupRoute : NavKey
@@ -74,8 +78,16 @@ fun SetupScreen(
     onNavigateToStudy: (String) -> Unit,
     viewModel: SetupViewModel = viewModel(),
     settingsViewModel: SettingsViewModel = viewModel(),
-    studyNoteViewModel: StudyNoteViewModel = viewModel()
+    studyNoteViewModel: StudyNoteViewModel = viewModel(),
+    taskViewModel: TaskViewModel = viewModel()
 ) {
+    val taskUiState by
+    taskViewModel.uiState.collectAsStateWithLifecycle()
+
+    var taskTitle by remember {
+        mutableStateOf("")
+    }
+
     val settingsUiState by
     settingsViewModel.uiState.collectAsStateWithLifecycle()
 
@@ -129,6 +141,73 @@ fun SetupScreen(
 
         Text(
             text = "读取结果：${noteUiState.savedText}"
+        )
+
+        SectionCard(
+            header = {
+                Text("Room 任务")
+            },
+            content = {
+
+                OutlinedTextField(
+                    value = taskTitle,
+                    onValueChange = {
+                        taskTitle = it
+                    },
+                    label = {
+                        Text("任务名称")
+                    }
+                )
+
+                Row {
+                    Button(
+                        onClick = {
+                            if (taskTitle.isNotBlank()) {
+                                taskViewModel.addTask(taskTitle)
+                                taskTitle = ""
+                            }
+                        }
+                    ) {
+                        Text("添加")
+                    }
+                }
+
+                Row {
+                    Text("仅显示未完成")
+
+                    Switch(
+                        checked = taskUiState.showIncompleteOnly,
+                        onCheckedChange = taskViewModel::setShowIncompleteOnly
+                    )
+                }
+
+                if (taskUiState.tasks.isEmpty()) {
+                    Text("暂无任务")
+                } else {
+                    taskUiState.tasks.forEach { task ->
+                        Row {
+                            Checkbox(
+                                checked = task.completed,
+                                onCheckedChange = {
+                                    taskViewModel.toggleCompleted(task)
+                                }
+                            )
+
+                            Text(
+                                text = "${task.id}. ${task.title}"
+                            )
+
+                            Button(
+                                onClick = {
+                                    taskViewModel.deleteTask(task)
+                                }
+                            ) {
+                                Text("删除")
+                            }
+                        }
+                    }
+                }
+            }
         )
     }
 }
