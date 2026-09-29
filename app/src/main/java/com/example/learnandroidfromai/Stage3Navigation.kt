@@ -93,23 +93,42 @@ fun StudyScreen(
     viewModel: StudyViewModel = viewModel()
 ) {
     Column {
-        SectionCard(
-            header = {
-                Text("学习主题")
-            },
-            content = {
-                // TODO：显示 topic
-            }
-        )
 
         SectionCard(
             header = {
-                Text("计数")
+                Text("当前 UI 状态")
             },
             content = {
-                // TODO：
-                // 显示 count
-                // 再放一个 +1 Button
+                when (val state = viewModel.uiState) {
+
+                    StudyUiState.Loading -> {
+                        Text("正在加载...")
+                    }
+
+                    StudyUiState.Empty -> {
+                        Text("暂无内容")
+                    }
+
+                    is StudyUiState.Error -> {
+                        Column {
+                            Text("错误：${state.message}")
+
+                            Button(
+                                onClick = viewModel::loadArticles
+                            ) {
+                                Text("重试")
+                            }
+                        }
+                    }
+
+                    is StudyUiState.Content -> {
+                        Column {
+                            state.articles.forEach { article ->
+                                Text(article)
+                            }
+                        }
+                    }
+                }
             }
         )
 
