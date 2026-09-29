@@ -93,14 +93,25 @@ fun StudyScreen(
     viewModel: StudyViewModel = viewModel()
 ) {
     Column {
-        Text("学习主题：$topic")
-        Text("计数：${viewModel.count}")
+        SectionCard(
+            header = {
+                Text("学习主题")
+            },
+            content = {
+                // TODO：显示 topic
+            }
+        )
 
-        Button(
-            onClick = viewModel::increase
-        ) {
-            Text("+1")
-        }
+        SectionCard(
+            header = {
+                Text("计数")
+            },
+            content = {
+                // TODO：
+                // 显示 count
+                // 再放一个 +1 Button
+            }
+        )
 
         Button(
             onClick = onBack
