@@ -60,37 +60,24 @@ sealed interface StudyUiState {
 
 class StudyViewModel : ViewModel() {
 
-    var uiState by mutableStateOf<StudyUiState>(
-        StudyUiState.Loading
-    )
-        private set
+    private val _uiState =
+        MutableStateFlow<StudyUiState>(StudyUiState.Loading)
 
-    var count by mutableIntStateOf(0)
-        private set
+    val uiState = _uiState.asStateFlow()
 
     init {
         loadArticles()
     }
 
-    fun increase() {
-        count++
-    }
-
     fun loadArticles() {
         viewModelScope.launch {
-            uiState = StudyUiState.Loading
+            _uiState.value = StudyUiState.Loading
 
             delay(2000)
 
-            try {
-                throw Exception("服务器连接失败")
-
-                // 以后这里才会是真正的数据加载
-            } catch (e: Exception) {
-                uiState = StudyUiState.Error(
-                    message = e.message ?: "未知错误"
-                )
-            }
+            _uiState.value = StudyUiState.Error(
+                "服务器连接失败"
+            )
         }
     }
 }

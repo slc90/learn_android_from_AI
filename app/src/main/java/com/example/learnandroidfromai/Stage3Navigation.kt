@@ -5,7 +5,9 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.entryProvider
@@ -92,6 +94,8 @@ fun StudyScreen(
     onBack: () -> Unit,
     viewModel: StudyViewModel = viewModel()
 ) {
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+
     Column {
 
         SectionCard(
@@ -99,7 +103,7 @@ fun StudyScreen(
                 Text("当前 UI 状态")
             },
             content = {
-                when (val state = viewModel.uiState) {
+                when (val state = uiState) {
 
                     StudyUiState.Loading -> {
                         Text("正在加载...")
@@ -132,9 +136,7 @@ fun StudyScreen(
             }
         )
 
-        Button(
-            onClick = onBack
-        ) {
+        Button(onClick = onBack) {
             Text("返回")
         }
     }
