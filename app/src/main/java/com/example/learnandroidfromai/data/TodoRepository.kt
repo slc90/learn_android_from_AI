@@ -1,25 +1,18 @@
 package com.example.learnandroidfromai.data
 
-import com.example.learnandroidfromai.data.remote.CreateTodoRequest
-import com.example.learnandroidfromai.data.remote.RetrofitClient
-import com.example.learnandroidfromai.data.remote.TodoDto
-import retrofit2.Response
+import com.example.learnandroidfromai.model.Todo
 
-class TodoRepository {
+interface TodoRepository {
 
-    suspend fun getTodo(id: Int): Response<TodoDto> {
-        return RetrofitClient.todoApi.getTodo(id)
-    }
+    suspend fun getTodo(id: Int): Todo
 
     suspend fun createTodo(
-        request: CreateTodoRequest
-    ): TodoDto {
-        return RetrofitClient.todoApi.createTodo(request)
-    }
+        userId: Int,
+        title: String,
+        completed: Boolean
+    ): Todo
 
     suspend fun getTodosByUser(
         userId: Int
-    ): Response<List<TodoDto>> {
-        return RetrofitClient.todoApi.getTodosByUser(userId)
-    }
+    ): List<Todo>
 }

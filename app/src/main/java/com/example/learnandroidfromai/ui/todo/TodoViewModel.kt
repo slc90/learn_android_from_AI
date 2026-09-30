@@ -1,32 +1,29 @@
-package com.example.learnandroidfromai
+package com.example.learnandroidfromai.ui.todo
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.learnandroidfromai.data.TodoRepository
-import com.example.learnandroidfromai.data.remote.CreateTodoRequest
-import com.example.learnandroidfromai.data.remote.TodoDto
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import com.example.learnandroidfromai.model.Todo
 
 data class TodoUiState(
     val isLoading: Boolean = true,
-    val todo: TodoDto? = null,
-    val todos: List<TodoDto> = emptyList(),
+    val todo: Todo? = null,
+    val todos: List<Todo> = emptyList(),
     val errorMessage: String? = null
 )
-
-class TodoViewModel : ViewModel() {
-
-    private val repository = TodoRepository()
+class TodoViewModel(
+    private val repository: TodoRepository
+) : ViewModel() {
 
     private val _uiState = MutableStateFlow(TodoUiState())
     val uiState = _uiState.asStateFlow()
 
     fun loadTodo(id: Int) {
         viewModelScope.launch {
-
             _uiState.update {
                 it.copy(
                     isLoading = true,
@@ -35,32 +32,20 @@ class TodoViewModel : ViewModel() {
             }
 
             try {
-                val response = repository.getTodo(id)
+                val todo = repository.getTodo(id)
 
-                if (response.isSuccessful) {
-                    val todo = response.body()
-
-                    _uiState.update {
-                        it.copy(
-                            isLoading = false,
-                            todo = todo,
-                            errorMessage = null
-                        )
-                    }
-                } else {
-                    _uiState.update {
-                        it.copy(
-                            isLoading = false,
-                            errorMessage = "HTTP ${response.code()}"
-                        )
-                    }
+                _uiState.update {
+                    it.copy(
+                        isLoading = false,
+                        todo = todo,
+                        errorMessage = null
+                    )
                 }
-
             } catch (e: Exception) {
                 _uiState.update {
                     it.copy(
                         isLoading = false,
-                        errorMessage = "网络异常：${e.message}"
+                        errorMessage = e.message
                     )
                 }
             }
@@ -77,13 +62,11 @@ class TodoViewModel : ViewModel() {
             }
 
             try {
-                val request = CreateTodoRequest(
+                val createdTodo = repository.createTodo(
                     userId = 1,
                     title = "我从 Android 发来的 Todo",
                     completed = false
                 )
-
-                val createdTodo = repository.createTodo(request)
 
                 _uiState.update {
                     it.copy(
@@ -112,28 +95,19 @@ class TodoViewModel : ViewModel() {
             }
 
             try {
-                val response = repository.getTodosByUser(userId)
+                val todos = repository.getTodosByUser(userId)
 
-                if (response.isSuccessful) {
-                    _uiState.update {
-                        it.copy(
-                            isLoading = false,
-                            todos = response.body() ?: emptyList()
-                        )
-                    }
-                } else {
-                    _uiState.update {
-                        it.copy(
-                            isLoading = false,
-                            errorMessage = "HTTP ${response.code()}"
-                        )
-                    }
+                _uiState.update {
+                    it.copy(
+                        isLoading = false,
+                        todos = todos
+                    )
                 }
             } catch (e: Exception) {
                 _uiState.update {
                     it.copy(
                         isLoading = false,
-                        errorMessage = "网络异常：${e.message}"
+                        errorMessage = e.message
                     )
                 }
             }
