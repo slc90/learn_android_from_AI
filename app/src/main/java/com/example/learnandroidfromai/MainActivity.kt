@@ -26,12 +26,76 @@ import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import android.Manifest
+import androidx.activity.result.contract.ActivityResultContracts
+import android.content.pm.PackageManager
+import androidx.core.content.ContextCompat
+import androidx.core.app.ActivityCompat
+import androidx.compose.material3.AlertDialog
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import android.content.Intent
+import android.provider.Settings
+import android.annotation.SuppressLint
+import android.hardware.camera2.CameraDevice
+import android.hardware.camera2.CameraManager
+import kotlinx.coroutines.delay
+
 
 class MainActivity : ComponentActivity() {
+    @SuppressLint("MissingPermission")
+    private fun tryOpenCamera() {
+        try {
+            val cameraManager =
+                getSystemService(CameraManager::class.java)
+
+            val cameraId =
+                cameraManager.cameraIdList.first()
+
+            cameraManager.openCamera(
+                cameraId,
+                object : CameraDevice.StateCallback() {
+
+                    override fun onOpened(camera: CameraDevice) {
+                        println("camera opened successfully")
+                        camera.close()
+                    }
+
+                    override fun onDisconnected(camera: CameraDevice) {
+                        println("camera disconnected")
+                        camera.close()
+                    }
+
+                    override fun onError(
+                        camera: CameraDevice,
+                        error: Int
+                    ) {
+                        println("camera open error = $error")
+                        camera.close()
+                    }
+                },
+                null
+            )
+        } catch (e: Exception) {
+            println(
+                "camera open exception = " +
+                        "${e::class.simpleName}: ${e.message}"
+            )
+        }
+    }
+
     @OptIn(ExperimentalMaterial3Api::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+
+        val cameraPermissionLauncher =
+            registerForActivityResult(
+                ActivityResultContracts.RequestPermission()
+            ) { granted ->
+                println("camera permission granted = $granted")
+            }
 
         val appContainer =
             (application as LearnAndroidApplication).appContainer
@@ -59,6 +123,10 @@ class MainActivity : ComponentActivity() {
 
         setContent {
             Learn_android_from_AITheme {
+                var showCameraRationale by remember {
+                    mutableStateOf(false)
+                }
+
                 Scaffold(
                     modifier = Modifier.fillMaxSize(),
                     topBar = {
@@ -90,6 +158,80 @@ class MainActivity : ComponentActivity() {
                         ) {
                             Text("Run Native Compute")
                         }
+
+                        Button(
+                            onClick = {
+                                val permissionStatus =
+                                    ContextCompat.checkSelfPermission(
+                                        this@MainActivity,
+                                        Manifest.permission.CAMERA
+                                    )
+
+                                if (permissionStatus == PackageManager.PERMISSION_GRANTED) {
+                                    println("camera permission already granted")
+                                } else {
+                                    val shouldShowRationale =
+                                        ActivityCompat.shouldShowRequestPermissionRationale(
+                                            this@MainActivity,
+                                            Manifest.permission.CAMERA
+                                        )
+
+                                    println("shouldShowRationale = $shouldShowRationale")
+
+                                    if (shouldShowRationale) {
+                                        showCameraRationale = true
+                                    } else {
+                                        cameraPermissionLauncher.launch(
+                                            Manifest.permission.CAMERA
+                                        )
+                                    }
+                                }
+                            }
+                        ) {
+                            Text("Request Camera Permission")
+                        }
+
+                        Button(
+                            onClick = {
+                                if (Settings.canDrawOverlays(this@MainActivity)) {
+                                    println("overlay permission already granted")
+                                } else {
+                                    println("overlay permission not granted")
+
+                                    val intent =
+                                        Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION)
+
+                                    startActivity(intent)
+                                }
+                            }
+                        ) {
+                            Text("Request Overlay Permission")
+                        }
+
+                        Button(
+                            onClick = {
+                                val permissionStatus =
+                                    ContextCompat.checkSelfPermission(
+                                        this@MainActivity,
+                                        Manifest.permission.CAMERA
+                                    )
+
+                                println(
+                                    "camera permission granted = " +
+                                            (permissionStatus == PackageManager.PERMISSION_GRANTED)
+                                )
+
+                                lifecycleScope.launch {
+                                    delay(10_000)
+
+                                    println("trying to open camera...")
+                                    tryOpenCamera()
+                                }
+                            }
+                        ) {
+                            Text("Test Camera Restriction")
+                        }
+
 //                    Stage3App(
 //                        modifier = Modifier.padding(innerPadding)
 //                    )
@@ -110,7 +252,36 @@ class MainActivity : ComponentActivity() {
                         )
                     }
                     }
+
+                if (showCameraRationale) {
+                    AlertDialog(
+                        onDismissRequest = {
+                            showCameraRationale = false
+                        },
+                        title = {
+                            Text("需要相机权限")
+                        },
+                        text = {
+                            Text("这个功能需要使用相机权限。")
+                        },
+                        confirmButton = {
+                            Button(
+                                onClick = {
+                                    showCameraRationale = false
+
+                                    cameraPermissionLauncher.launch(
+                                        Manifest.permission.CAMERA
+                                    )
+                                }
+                            ) {
+                                Text("继续申请")
+                            }
+                        }
+                    )
                 }
+                }
+
+
             }
         }
 }
