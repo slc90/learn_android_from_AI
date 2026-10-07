@@ -4,6 +4,7 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
@@ -16,6 +17,7 @@ import com.example.learnandroidfromai.ui.theme.Learn_android_from_AITheme
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.unit.dp
 import com.example.learnandroidfromai.ui.todo.TodoScreen
 import com.example.learnandroidfromai.ui.todo.TodoViewModel
 import com.example.learnandroidfromai.ui.todo.TodoViewModelFactory
@@ -67,41 +69,46 @@ class MainActivity : ComponentActivity() {
                         )
                     }
                 ) { innerPadding ->
-                    Button(
-                        modifier = Modifier.padding(innerPadding),
-                        onClick = {
-                            println("start compute")
-                            lifecycleScope.launch {
-                                val result = withContext(Dispatchers.Default) {
-                                    nativeBridge.runMatrixMultiply(1000)
-                                }
-
-                                println("matrix result = $result")
-                                println("end compute")
-                            }
-                        }
+                    Column(
+                        modifier = Modifier
+                            .padding(16.dp)
+                            .fillMaxSize()
                     ) {
-                        Text("Run Native Compute")
-                    }
+                        Button(
+                            modifier = Modifier.padding(innerPadding),
+                            onClick = {
+                                println("start compute")
+                                lifecycleScope.launch {
+                                    val result = withContext(Dispatchers.Default) {
+                                        nativeBridge.runMatrixMultiply(1000)
+                                    }
+
+                                    println("matrix result = $result")
+                                    println("end compute")
+                                }
+                            }
+                        ) {
+                            Text("Run Native Compute")
+                        }
 //                    Stage3App(
 //                        modifier = Modifier.padding(innerPadding)
 //                    )
 
-                    val todoViewModel: TodoViewModel = viewModel(
-                        factory = TodoViewModelFactory(
-                            appContainer.todoRepository
+                        val todoViewModel: TodoViewModel = viewModel(
+                            factory = TodoViewModelFactory(
+                                appContainer.todoRepository
+                            )
                         )
-                    )
 //
-                    val todoUiState by todoViewModel.uiState.collectAsState()
-                    TodoScreen(
-                        uiState = todoUiState,
-                        onLoadTodo = todoViewModel::loadTodo,
-                        onCreateTodo = todoViewModel::createTodo,
-                        onLoadTodosByUser = todoViewModel::loadTodosByUser,
-                        modifier = Modifier.padding(innerPadding)
-                    )
-
+                        val todoUiState by todoViewModel.uiState.collectAsState()
+                        TodoScreen(
+                            uiState = todoUiState,
+                            onLoadTodo = todoViewModel::loadTodo,
+                            onCreateTodo = todoViewModel::createTodo,
+                            onLoadTodosByUser = todoViewModel::loadTodosByUser,
+                            modifier = Modifier.padding(innerPadding)
+                        )
+                    }
                     }
                 }
             }
