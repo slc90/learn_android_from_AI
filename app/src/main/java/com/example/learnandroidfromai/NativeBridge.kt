@@ -28,6 +28,8 @@ class NativeBridge {
 
     external fun createPeople(): List<Person>
 
+    external fun eigenSum(): Int
+
     companion object {
         init {
             System.loadLibrary("native-lib")

@@ -30,6 +30,10 @@ class MainActivity : ComponentActivity() {
             (application as LearnAndroidApplication).appContainer
 
         val nativeBridge = NativeBridge()
+
+        val eigenSum = nativeBridge.eigenSum()
+        println("eigenSum result = $eigenSum")
+
         val person = Person("mdrs", 18)
 
         val result = nativeBridge.describePerson(person)

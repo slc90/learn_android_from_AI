@@ -2,6 +2,7 @@
 #include <string>
 #include <vector>
 #include <thread>
+#include <Eigen/Dense>
 
 extern "C"
 JNIEXPORT jint JNICALL
@@ -380,4 +381,18 @@ Java_com_example_learnandroidfromai_NativeBridge_createPeople(
     env->DeleteLocalRef(person2);
 
     return list;
+}
+
+extern "C"
+JNIEXPORT jint JNICALL
+Java_com_example_learnandroidfromai_NativeBridge_eigenSum(
+        JNIEnv* env,
+        jobject thiz
+) {
+    Eigen::Matrix2i matrix;
+
+    matrix << 1, 2,
+            3, 4;
+
+    return matrix.sum();
 }
