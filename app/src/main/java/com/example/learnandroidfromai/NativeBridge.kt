@@ -1,5 +1,7 @@
 package com.example.learnandroidfromai
 
+import com.example.learnandroidfromai.model.Person
+
 class NativeBridge {
 
     external fun add(a: Int, b: Int): Int
@@ -17,6 +19,14 @@ class NativeBridge {
     fun onNativeResult(value: Int) {
         println("Native result = $value")
     }
+
+    external fun describePerson(person: Person): String
+
+    external fun createPerson(): Person
+
+    external fun describePeople(people: List<Person>): String
+
+    external fun createPeople(): List<Person>
 
     companion object {
         init {

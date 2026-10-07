@@ -145,3 +145,239 @@ Java_com_example_learnandroidfromai_NativeBridge_startWork(
 
     }).detach();
 }
+
+
+extern "C"
+JNIEXPORT jstring JNICALL
+Java_com_example_learnandroidfromai_NativeBridge_describePerson(
+        JNIEnv* env,
+        jobject thiz,
+        jobject person
+) {
+    jclass personClass = env->GetObjectClass(person);
+
+    jfieldID nameField = env->GetFieldID(
+            personClass,
+            "name",
+            "Ljava/lang/String;"
+    );
+
+    jfieldID ageField = env->GetFieldID(
+            personClass,
+            "age",
+            "I"
+    );
+
+    jstring name = (jstring) env->GetObjectField(
+            person,
+            nameField
+    );
+
+    jint age = env->GetIntField(
+            person,
+            ageField
+    );
+
+    const char* nativeName =
+            env->GetStringUTFChars(name, nullptr);
+
+    std::string result = "Person(name=";
+    result += nativeName;
+    result += ", age=";
+    result += std::to_string(age);
+    result += ")";
+
+    env->ReleaseStringUTFChars(
+            name,
+            nativeName
+    );
+
+    return env->NewStringUTF(result.c_str());
+}
+
+extern "C"
+JNIEXPORT jobject JNICALL
+Java_com_example_learnandroidfromai_NativeBridge_createPerson(
+        JNIEnv* env,
+        jobject thiz
+) {
+    jclass personClass = env->FindClass(
+            "com/example/learnandroidfromai/model/Person"
+    );
+
+    jmethodID constructor = env->GetMethodID(
+            personClass,
+            "<init>",
+            "(Ljava/lang/String;I)V"
+    );
+
+    jstring name = env->NewStringUTF("Native");
+
+    jobject person = env->NewObject(
+            personClass,
+            constructor,
+            name,
+            42
+    );
+
+    return person;
+}
+
+extern "C"
+JNIEXPORT jstring JNICALL
+Java_com_example_learnandroidfromai_NativeBridge_describePeople(
+        JNIEnv* env,
+        jobject thiz,
+        jobject people
+) {
+    jclass listClass = env->GetObjectClass(people);
+
+    jmethodID sizeMethod = env->GetMethodID(
+            listClass,
+            "size",
+            "()I"
+    );
+
+    jmethodID getMethod = env->GetMethodID(
+            listClass,
+            "get",
+            "(I)Ljava/lang/Object;"
+    );
+
+    jint size = env->CallIntMethod(
+            people,
+            sizeMethod
+    );
+
+    jclass personClass = env->FindClass(
+            "com/example/learnandroidfromai/model/Person"
+    );
+
+    jfieldID nameField = env->GetFieldID(
+            personClass,
+            "name",
+            "Ljava/lang/String;"
+    );
+
+    jfieldID ageField = env->GetFieldID(
+            personClass,
+            "age",
+            "I"
+    );
+
+    std::string result = "[";
+
+    for (jint i = 0; i < size; ++i) {
+        jobject person = env->CallObjectMethod(
+                people,
+                getMethod,
+                i
+        );
+
+        jstring name = (jstring) env->GetObjectField(
+                person,
+                nameField
+        );
+
+        jint age = env->GetIntField(
+                person,
+                ageField
+        );
+
+        const char* nativeName =
+                env->GetStringUTFChars(name, nullptr);
+
+        if (i > 0) {
+            result += ", ";
+        }
+
+        result += "Person(name=";
+        result += nativeName;
+        result += ", age=";
+        result += std::to_string(age);
+        result += ")";
+
+        env->ReleaseStringUTFChars(
+                name,
+                nativeName
+        );
+
+        env->DeleteLocalRef(name);
+        env->DeleteLocalRef(person);
+    }
+
+    result += "]";
+
+    return env->NewStringUTF(result.c_str());
+}
+
+extern "C"
+JNIEXPORT jobject JNICALL
+Java_com_example_learnandroidfromai_NativeBridge_createPeople(
+        JNIEnv* env,
+        jobject thiz
+) {
+    jclass listClass = env->FindClass("java/util/ArrayList");
+
+    jmethodID listConstructor = env->GetMethodID(
+            listClass,
+            "<init>",
+            "()V"
+    );
+
+    jmethodID addMethod = env->GetMethodID(
+            listClass,
+            "add",
+            "(Ljava/lang/Object;)Z"
+    );
+
+    jobject list = env->NewObject(
+            listClass,
+            listConstructor
+    );
+
+    jclass personClass = env->FindClass(
+            "com/example/learnandroidfromai/model/Person"
+    );
+
+    jmethodID personConstructor = env->GetMethodID(
+            personClass,
+            "<init>",
+            "(Ljava/lang/String;I)V"
+    );
+
+    jstring name1 = env->NewStringUTF("Native Alice");
+    jobject person1 = env->NewObject(
+            personClass,
+            personConstructor,
+            name1,
+            21
+    );
+
+    env->CallBooleanMethod(
+            list,
+            addMethod,
+            person1
+    );
+
+    jstring name2 = env->NewStringUTF("Native Bob");
+    jobject person2 = env->NewObject(
+            personClass,
+            personConstructor,
+            name2,
+            31
+    );
+
+    env->CallBooleanMethod(
+            list,
+            addMethod,
+            person2
+    );
+
+    env->DeleteLocalRef(name1);
+    env->DeleteLocalRef(person1);
+    env->DeleteLocalRef(name2);
+    env->DeleteLocalRef(person2);
+
+    return list;
+}

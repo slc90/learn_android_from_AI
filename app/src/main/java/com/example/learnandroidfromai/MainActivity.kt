@@ -18,6 +18,7 @@ import androidx.compose.runtime.getValue
 import com.example.learnandroidfromai.ui.todo.TodoScreen
 import com.example.learnandroidfromai.ui.todo.TodoViewModel
 import com.example.learnandroidfromai.ui.todo.TodoViewModelFactory
+import com.example.learnandroidfromai.model.Person
 
 class MainActivity : ComponentActivity() {
     @OptIn(ExperimentalMaterial3Api::class)
@@ -27,6 +28,26 @@ class MainActivity : ComponentActivity() {
 
         val appContainer =
             (application as LearnAndroidApplication).appContainer
+
+        val nativeBridge = NativeBridge()
+        val person = Person("mdrs", 18)
+
+        val result = nativeBridge.describePerson(person)
+        println("describePerson result = $result")
+
+        val nativePerson = nativeBridge.createPerson()
+        println("createPerson result = $nativePerson")
+
+        val people = listOf(
+            Person("Alice", 20),
+            Person("Bob", 30)
+        )
+
+        val peopleResult = nativeBridge.describePeople(people)
+        println("describePeople result = $peopleResult")
+
+        val nativePeople = nativeBridge.createPeople()
+        println("createPeople result = $nativePeople")
 
         setContent {
             Learn_android_from_AITheme {
