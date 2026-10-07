@@ -28,7 +28,7 @@ class NativeBridge {
 
     external fun createPeople(): List<Person>
 
-    external fun eigenSum(): Int
+    external fun runMatrixMultiply(size: Int): Double
 
     companion object {
         init {

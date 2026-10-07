@@ -6,6 +6,7 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -19,6 +20,10 @@ import com.example.learnandroidfromai.ui.todo.TodoScreen
 import com.example.learnandroidfromai.ui.todo.TodoViewModel
 import com.example.learnandroidfromai.ui.todo.TodoViewModelFactory
 import com.example.learnandroidfromai.model.Person
+import androidx.lifecycle.lifecycleScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class MainActivity : ComponentActivity() {
     @OptIn(ExperimentalMaterial3Api::class)
@@ -30,9 +35,6 @@ class MainActivity : ComponentActivity() {
             (application as LearnAndroidApplication).appContainer
 
         val nativeBridge = NativeBridge()
-
-        val eigenSum = nativeBridge.eigenSum()
-        println("eigenSum result = $eigenSum")
 
         val person = Person("mdrs", 18)
 
@@ -65,6 +67,22 @@ class MainActivity : ComponentActivity() {
                         )
                     }
                 ) { innerPadding ->
+                    Button(
+                        modifier = Modifier.padding(innerPadding),
+                        onClick = {
+                            println("start compute")
+                            lifecycleScope.launch {
+                                val result = withContext(Dispatchers.Default) {
+                                    nativeBridge.runMatrixMultiply(1000)
+                                }
+
+                                println("matrix result = $result")
+                                println("end compute")
+                            }
+                        }
+                    ) {
+                        Text("Run Native Compute")
+                    }
 //                    Stage3App(
 //                        modifier = Modifier.padding(innerPadding)
 //                    )
@@ -74,7 +92,7 @@ class MainActivity : ComponentActivity() {
                             appContainer.todoRepository
                         )
                     )
-
+//
                     val todoUiState by todoViewModel.uiState.collectAsState()
                     TodoScreen(
                         uiState = todoUiState,
@@ -83,6 +101,7 @@ class MainActivity : ComponentActivity() {
                         onLoadTodosByUser = todoViewModel::loadTodosByUser,
                         modifier = Modifier.padding(innerPadding)
                     )
+
                     }
                 }
             }

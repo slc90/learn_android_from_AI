@@ -3,6 +3,7 @@
 #include <vector>
 #include <thread>
 #include <Eigen/Dense>
+#include "matrix_compute.h"
 
 extern "C"
 JNIEXPORT jint JNICALL
@@ -384,15 +385,11 @@ Java_com_example_learnandroidfromai_NativeBridge_createPeople(
 }
 
 extern "C"
-JNIEXPORT jint JNICALL
-Java_com_example_learnandroidfromai_NativeBridge_eigenSum(
+JNIEXPORT jdouble JNICALL
+Java_com_example_learnandroidfromai_NativeBridge_runMatrixMultiply(
         JNIEnv* env,
-        jobject thiz
+        jobject thiz,
+        jint size
 ) {
-    Eigen::Matrix2i matrix;
-
-    matrix << 1, 2,
-            3, 4;
-
-    return matrix.sum();
+    return runMatrixMultiply(size);
 }
