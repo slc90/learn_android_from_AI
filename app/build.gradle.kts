@@ -1,8 +1,16 @@
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.jetbrains.kotlin.serialization)
     alias(libs.plugins.ksp)
+}
+
+val signingProperties = Properties().apply {
+    rootProject.file("signing.properties")
+        .inputStream()
+        .use { load(it) }
 }
 
 android {
@@ -15,14 +23,30 @@ android {
         applicationId = "com.example.learnandroidfromai"
         minSdk = 24
         targetSdk = 37
-        versionCode = 1
-        versionName = "1.0"
+        versionCode = 2
+        versionName = "1.1"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
+    signingConfigs {
+        create("release") {
+            storeFile = rootProject.file(
+                signingProperties.getProperty("RELEASE_STORE_FILE")
+            )
+            storePassword =
+                signingProperties.getProperty("RELEASE_STORE_PASSWORD")
+            keyAlias =
+                signingProperties.getProperty("RELEASE_KEY_ALIAS")
+            keyPassword =
+                signingProperties.getProperty("RELEASE_KEY_PASSWORD")
+        }
+    }
+
     buildTypes {
         release {
+            signingConfig = signingConfigs.getByName("release")
+
             optimization {
                 enable = false
             }

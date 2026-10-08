@@ -142,7 +142,7 @@ class MainActivity : ComponentActivity() {
                             .padding(innerPadding)
                             .fillMaxSize()
                     ) {
-                        BluetoothScreen()
+//                        BluetoothScreen()
 //                        Button(
 //                            modifier = Modifier.padding(innerPadding),
 //                            onClick = {
@@ -233,9 +233,9 @@ class MainActivity : ComponentActivity() {
 //                            Text("Test Camera Restriction")
 //                        }
 
-//                    Stage3App(
-//                        modifier = Modifier.padding(innerPadding)
-//                    )
+                    Stage3App(
+                        modifier = Modifier.padding(innerPadding)
+                    )
 
 //                        val todoViewModel: TodoViewModel = viewModel(
 //                            factory = TodoViewModelFactory(
