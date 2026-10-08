@@ -41,7 +41,7 @@ import android.annotation.SuppressLint
 import android.hardware.camera2.CameraDevice
 import android.hardware.camera2.CameraManager
 import kotlinx.coroutines.delay
-
+import com.example.learnandroidfromai.ui.bluetooth.BluetoothScreen
 
 class MainActivity : ComponentActivity() {
     @SuppressLint("MissingPermission")
@@ -139,117 +139,118 @@ class MainActivity : ComponentActivity() {
                 ) { innerPadding ->
                     Column(
                         modifier = Modifier
-                            .padding(16.dp)
+                            .padding(innerPadding)
                             .fillMaxSize()
                     ) {
-                        Button(
-                            modifier = Modifier.padding(innerPadding),
-                            onClick = {
-                                println("start compute")
-                                lifecycleScope.launch {
-                                    val result = withContext(Dispatchers.Default) {
-                                        nativeBridge.runMatrixMultiply(1000)
-                                    }
-
-                                    println("matrix result = $result")
-                                    println("end compute")
-                                }
-                            }
-                        ) {
-                            Text("Run Native Compute")
-                        }
-
-                        Button(
-                            onClick = {
-                                val permissionStatus =
-                                    ContextCompat.checkSelfPermission(
-                                        this@MainActivity,
-                                        Manifest.permission.CAMERA
-                                    )
-
-                                if (permissionStatus == PackageManager.PERMISSION_GRANTED) {
-                                    println("camera permission already granted")
-                                } else {
-                                    val shouldShowRationale =
-                                        ActivityCompat.shouldShowRequestPermissionRationale(
-                                            this@MainActivity,
-                                            Manifest.permission.CAMERA
-                                        )
-
-                                    println("shouldShowRationale = $shouldShowRationale")
-
-                                    if (shouldShowRationale) {
-                                        showCameraRationale = true
-                                    } else {
-                                        cameraPermissionLauncher.launch(
-                                            Manifest.permission.CAMERA
-                                        )
-                                    }
-                                }
-                            }
-                        ) {
-                            Text("Request Camera Permission")
-                        }
-
-                        Button(
-                            onClick = {
-                                if (Settings.canDrawOverlays(this@MainActivity)) {
-                                    println("overlay permission already granted")
-                                } else {
-                                    println("overlay permission not granted")
-
-                                    val intent =
-                                        Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION)
-
-                                    startActivity(intent)
-                                }
-                            }
-                        ) {
-                            Text("Request Overlay Permission")
-                        }
-
-                        Button(
-                            onClick = {
-                                val permissionStatus =
-                                    ContextCompat.checkSelfPermission(
-                                        this@MainActivity,
-                                        Manifest.permission.CAMERA
-                                    )
-
-                                println(
-                                    "camera permission granted = " +
-                                            (permissionStatus == PackageManager.PERMISSION_GRANTED)
-                                )
-
-                                lifecycleScope.launch {
-                                    delay(10_000)
-
-                                    println("trying to open camera...")
-                                    tryOpenCamera()
-                                }
-                            }
-                        ) {
-                            Text("Test Camera Restriction")
-                        }
+                        BluetoothScreen()
+//                        Button(
+//                            modifier = Modifier.padding(innerPadding),
+//                            onClick = {
+//                                println("start compute")
+//                                lifecycleScope.launch {
+//                                    val result = withContext(Dispatchers.Default) {
+//                                        nativeBridge.runMatrixMultiply(1000)
+//                                    }
+//
+//                                    println("matrix result = $result")
+//                                    println("end compute")
+//                                }
+//                            }
+//                        ) {
+//                            Text("Run Native Compute")
+//                        }
+//
+//                        Button(
+//                            onClick = {
+//                                val permissionStatus =
+//                                    ContextCompat.checkSelfPermission(
+//                                        this@MainActivity,
+//                                        Manifest.permission.CAMERA
+//                                    )
+//
+//                                if (permissionStatus == PackageManager.PERMISSION_GRANTED) {
+//                                    println("camera permission already granted")
+//                                } else {
+//                                    val shouldShowRationale =
+//                                        ActivityCompat.shouldShowRequestPermissionRationale(
+//                                            this@MainActivity,
+//                                            Manifest.permission.CAMERA
+//                                        )
+//
+//                                    println("shouldShowRationale = $shouldShowRationale")
+//
+//                                    if (shouldShowRationale) {
+//                                        showCameraRationale = true
+//                                    } else {
+//                                        cameraPermissionLauncher.launch(
+//                                            Manifest.permission.CAMERA
+//                                        )
+//                                    }
+//                                }
+//                            }
+//                        ) {
+//                            Text("Request Camera Permission")
+//                        }
+//
+//                        Button(
+//                            onClick = {
+//                                if (Settings.canDrawOverlays(this@MainActivity)) {
+//                                    println("overlay permission already granted")
+//                                } else {
+//                                    println("overlay permission not granted")
+//
+//                                    val intent =
+//                                        Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION)
+//
+//                                    startActivity(intent)
+//                                }
+//                            }
+//                        ) {
+//                            Text("Request Overlay Permission")
+//                        }
+//
+//                        Button(
+//                            onClick = {
+//                                val permissionStatus =
+//                                    ContextCompat.checkSelfPermission(
+//                                        this@MainActivity,
+//                                        Manifest.permission.CAMERA
+//                                    )
+//
+//                                println(
+//                                    "camera permission granted = " +
+//                                            (permissionStatus == PackageManager.PERMISSION_GRANTED)
+//                                )
+//
+//                                lifecycleScope.launch {
+//                                    delay(10_000)
+//
+//                                    println("trying to open camera...")
+//                                    tryOpenCamera()
+//                                }
+//                            }
+//                        ) {
+//                            Text("Test Camera Restriction")
+//                        }
 
 //                    Stage3App(
 //                        modifier = Modifier.padding(innerPadding)
 //                    )
 
-                        val todoViewModel: TodoViewModel = viewModel(
-                            factory = TodoViewModelFactory(
-                                appContainer.todoRepository
-                            )
-                        )
-//
-                        val todoUiState by todoViewModel.uiState.collectAsState()
-                        TodoScreen(
-                            uiState = todoUiState,
-                            onLoadTodo = todoViewModel::loadTodo,
-                            onCreateTodo = todoViewModel::createTodo,
-                            onLoadTodosByUser = todoViewModel::loadTodosByUser,
-                            modifier = Modifier.padding(innerPadding)
-                        )
+//                        val todoViewModel: TodoViewModel = viewModel(
+//                            factory = TodoViewModelFactory(
+//                                appContainer.todoRepository
+//                            )
+//                        )
+////
+//                        val todoUiState by todoViewModel.uiState.collectAsState()
+//                        TodoScreen(
+//                            uiState = todoUiState,
+//                            onLoadTodo = todoViewModel::loadTodo,
+//                            onCreateTodo = todoViewModel::createTodo,
+//                            onLoadTodosByUser = todoViewModel::loadTodosByUser,
+//                            modifier = Modifier.padding(innerPadding)
+//                        )
                     }
                     }
 
